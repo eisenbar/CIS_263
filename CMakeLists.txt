@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.8)
-project(hw01_permute)
+project(CoinExample)
 
 set(CMAKE_CXX_STANDARD 11)
 
-set(SOURCE_FILES hw01-permute.cpp)
-add_executable(hw01_permute ${SOURCE_FILES})
+set(SOURCE_FILES main.cpp Coin.cpp Coin.h)
+add_executable(CoinExample ${SOURCE_FILES})
