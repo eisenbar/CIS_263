@@ -1,12 +1,12 @@
 //
-// Created by Ryan Eisenbarth on 10/21/17.
+// Ryan Eisenbarth
 //
 
-#ifndef HW_03_BINARYSEARCHTREE_H
-#define HW_03_BINARYSEARCHTREE_H
-
+#ifndef BINARYTREES_BINARYSEARCHTREE_H
+#define BINARYTREES_BINARYSEARCHTREE_H
 #include <memory>
 #include <iostream>
+#include <vector>
 
 using namespace std;
 
@@ -34,36 +34,41 @@ public:
         print (out, root);
     }
 
-    /* TODO: add the following public functions (lines 10-19, page 133 of textbook) .
-     * findMin(), findMax(), contains(), isEmpty(), makeEmpty(), remove()
-     *
-     * and write their corresponding private functions in the private section below
-     * Remember to use shared_ptr<Node> in place of Node* shown in text book code
-     *
-     */
-
-    const E & findMin() const{
-        return findMin(root)->data;
+    bool isEmpty() const {
+        return root != nullptr;
     }
 
-    const E & findMax() const {
-        return findMax(root)->data;
+    int number_of_nodes() const {
+        int count = 0;
+        count = nodeCount(root);
+
+        return count;
     }
 
-    bool contains(const E & x) const{
-        return contains(x, root);
+    int number_of_leaves() const {
+        int leaves = 0;
+        leaves = countLeaves( root );
+
+        return leaves;
     }
 
-    bool isEmpty() const{
-        return isEmpty(root);
+    int number_of_full_nodes() const {
+        int full = 0;
+        full = countFull(root);
+
+        return full;
     }
 
-    void makeEmpty(){
-        makeEmpty(root);
-    }
+    vector<E> remove_leaves() {
+        vector<E> result;
 
-    void remove(const E & x){
-        remove(x, root);
+        if(root->left == nullptr && root->right == nullptr){
+            result.push_back(root->data);
+            root = nullptr;
+        }
+        else
+            return remove_leaves(root, result);
+        return result;
     }
 
 private:
@@ -96,75 +101,77 @@ private:
         }
     }
 
-    void purge (shared_ptr<Node> ptr) {
+    void purge (shared_ptr<Node>& ptr) {
         if (ptr != nullptr) {
             purge (ptr->left);
             purge (ptr->right);
             ptr.reset();
         }
     }
+    vector<E> remove_leaves( shared_ptr<Node> e, vector<E> result ){
 
-    shared_ptr<Node> findMin( shared_ptr<Node> t) const{
-        if( t == nullptr)
-            return nullptr;
-        if(t->left == nullptr)
-            return t;
-        return findMin(t->left);
-    }
 
-    shared_ptr<Node> findMax( shared_ptr<Node> t) const{
-        if( t == nullptr)
-            return nullptr;
-        if(t->right == nullptr)
-            return t;
-        return findMax(t->right);
-    }
-
-    bool contains(const E & x, shared_ptr<Node> t) const{
-        if( t == nullptr)
-            return false;
-        else if(x < t->data)
-            return contains(x, t->left);
-        else if(t->data < x)
-            return contains(x, t->right);
-        else {
-
-            return true;
+        //left recursion
+        if(e->left != nullptr) {
+            if (e->left->left == nullptr && e->left->right == nullptr) {
+                result.push_back(e->left->data);
+                e->left = nullptr;
+            }
+            else
+                remove_leaves(e->left, result);
         }
-    }
-    void remove(const E & x, shared_ptr<Node> & t){
-        if (t == nullptr)
-            return;
-        if (x < t->data)
-            remove(x, t->left);
-        else if(t->data < x)
-            remove(x, t->right);
-        else if(t->left != nullptr && t->right != nullptr){
-            t->data = findMin(t->right)->data;
-            remove(t->data, t->right);
-        }
-        else{
-            shared_ptr<Node> old = t;
-            t = (t->left != nullptr) ? t->left : t->right;
-            old.reset();
-        }
-    }
 
-    void makeEmpty(shared_ptr<Node> & t){
-        if(t != nullptr){
-            makeEmpty(t->left);
-            makeEmpty(t->right);
-            t.reset();
+        //right recursion
+        if(e->right != nullptr) {
+            if (e->right->left == nullptr && e->right->right == nullptr) {
+                result.push_back(e->right->data);
+                e->right = nullptr;
+            }
+            else
+                remove_leaves(e->right, result);
         }
-        t = nullptr;
+        return result;
     }
-    bool isEmpty(shared_ptr<Node> t) const{
-        if(t == nullptr)
-            return true;
-        return false;
+    int countLeaves(shared_ptr<Node> e) const{
+
+        if(e == nullptr)
+            return 0;
+
+        if(e->left == nullptr && e->right == nullptr)
+            return 1;
+
+        return countLeaves(e->left) + countLeaves(e->right);
     }
+    int countFull(shared_ptr<Node> e) const{
 
+        if(root == nullptr)
+            return 0;
 
+        if(e->left == nullptr && e->right == nullptr)
+            return 0;
+
+        if(e->left != nullptr && e->right != nullptr)
+            return 1 + countFull(e->left) + countFull(e->right);
+
+        if(e->left != nullptr && e->right == nullptr)
+            return countFull(e->left);
+
+        if(e->left == nullptr && e->right != nullptr)
+            return countFull(e->right);
+    }
+    int nodeCount(shared_ptr<Node> e) const{
+
+        if(e == nullptr)
+            return 0;
+
+        int ndeCnt = 1;
+
+        if(e->left != nullptr)
+            ndeCnt += nodeCount(e->left);
+        if(e->right != nullptr)
+            ndeCnt += nodeCount(e->right);
+
+        return ndeCnt;
+    }
 };
-
-#endif //HW_03_BINARYSEARCHTREE_H
+#endif //BINARYTREES_BINARYSEARCHTREE_H
